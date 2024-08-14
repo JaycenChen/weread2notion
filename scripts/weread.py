@@ -281,6 +281,66 @@ def get_children(chapter, summary, bookmark_list):
     return children, grandchild
 
 
+def get_bookmark_mindmd(chapter, summary, bookmark_list):
+    children = []
+    grandchild = {}
+    if chapter != None:
+        # 添加目录
+        # children.append(get_table_of_contents())
+        d = {}
+        # 去除前面的封面和版权信息
+        chapterValues= list(chapter.values())[2:]
+        for subChapter in chapterValues:
+            chapterUid = subChapter.get("chapterUid", 1)
+            if chapterUid not in d:
+                d[chapterUid] = []
+        for data in bookmark_list:
+            chapterUid = data.get("chapterUid", 1)
+            if chapterUid not in d:
+                d[chapterUid] = []
+            d[chapterUid].append(data)
+        for key, value in d.items():
+            level = 0
+            if key in chapter:
+                # 添加章节
+                level = chapter.get(key).get("level")
+                title = chapter.get(key).get("title")
+                title = f"{title}** \n\n"
+                if  level== 1:
+                    title = "## **"+title
+                elif level == 2:
+                    title = "- **"+title
+                else:
+                    title = "  - **"+title
+                children.append(title)
+            for i in value:
+                markText = i.get("markText")
+                for j in range(0, len(markText) // 2000 + 1):
+                    subMark= markText[j * 2000 : (j + 1) * 2000]+" \n\n"
+                    if  level== 0:
+                        subMark = "## "+subMark
+                    elif  level== 1:
+                        subMark = "- "+subMark
+                    elif level == 2:
+                        subMark = "  - "+subMark
+                    else:
+                        subMark = "    - "+subMark
+                    children.append(subMark)
+                # if i.get("abstract") != None and i.get("abstract") != "":
+                #     quote = get_quote(i.get("abstract"))
+                #     grandchild[len(children) - 1] = quote
+
+    else:
+        # 如果没有章节信息
+        for data in bookmark_list:
+            markText = data.get("markText")
+            for i in range(0, len(markText) // 2000 + 1):
+                children.append("## "+markText[i * 2000 : (i + 1) * 2000])
+    
+    return children #, grandchild
+
+
+
 def transform_id(book_id):
     id_length = len(book_id)
 
@@ -454,6 +514,12 @@ if __name__ == "__main__":
                 ),
             )
             children, grandchild = get_children(chapter, summary, bookmark_list)
+            MMind = get_bookmark_mindmd(chapter, summary, bookmark_list)
+            markmap_pre = f"---\ntitle: {title}\nmarkmap:\n  colorFreezeLevel: 2\n  maxWidth: 500\n---\n\n"
+            MMindText = markmap_pre+"".join(MMind)
+            print("MMind: ", MMindText)
+            with open(f'./MMind/{title}_bookmark.md', 'w') as file:
+                file.write(MMindText)
             results = add_children(id, children)
             if len(grandchild) > 0 and results != None:
                 add_grandchild(grandchild, results)
