@@ -6,7 +6,7 @@
 
 ## 开发
 > [!IMPORTANT]  
-> 根据已读/在读书籍目录与摘抄关系生成[markmap](https://markmap.js.org/repl)格式的markdown代码，从而支持脑图的输出。
+> 根据已读/在读书籍目录与摘抄关系，在MMind文件夹中为每本书生成[markmap](https://markmap.js.org/repl)格式的markdown代码，从而支持脑图的输出。
 
 ## 使用
 
